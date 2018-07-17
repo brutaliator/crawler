@@ -19,18 +19,48 @@
  */
 package com.mikadev.tools;
 
+import com.mikadev.tools.database.Create;
 import com.mikadev.tools.html.Client;
 import com.mikadev.tools.html.Response;
+import com.mikadev.tools.xml.Activity;
+import com.mikadev.tools.xml.ConfigParser;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Crawler {
+
     public static void main(String[] args) {
-        Client client = new Client();
+        /*Client client = new Client();
         try {
             Response response = client.plainGetRequest("https://www.google.ru");
             System.out.println(response.getStatus());
             System.out.println(response.getDom());
         } catch (Exception e) {
             e.printStackTrace();
+        }*/
+        try {
+            init();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
+    private static void init() throws Exception {
+        File configFile = new File("config.xml");
+        if(!configFile.exists()) {
+            throw new Exception("config.xml not found in the root directory.");
+        }
+
+        File dbFile = new File("db.h2.db");
+        if(!dbFile.exists()) {
+            Create.newDbCreate();
+        }
+
+        //
+        //ConfigParser configParser = new ConfigParser();
+        //Config config = configParser.parse();
+
+}
 }

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Config>
+    <Kinds_of_activity>
+        <Activity type="name">
+            <District>
+                <Region>0</Region>
+                <Cities>
+                    <City>City</City>
+                </Cities>
+            </District>
+            <Keywords>
+                <Key>Key</Key>
+            </Keywords>
+            <Emails>
+                <Mail>example@example.com</Mail>
+            </Emails>
+            <Telegram>0</Telegram>
+        </Activity>
+    </Kinds_of_activity>
+</Config>
