@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <RollingFile name="RollingfileAppender"
+                     fileName="log/logfile.log"
+                     filePattern="log/logfile-%d{yyyy-MM-dd}-%i.log.gz">
+            <Policies>
+                <SizeBasedTriggeringPolicy size="17 kB"/>
+            </Policies>
+
+            <PatternLayout>
+                <ScriptPatternSelector defaultPattern="">
+                    <Script name="selector" language="js"><![CDATA[
+                var ret
+            if (logEvent.getLevel() == org.apache.logging.log4j.Level.ERROR)
+                ret  = "ERROR"
+            else
+                ret = "INFO"
+          ]]>
+                    </Script>
+                    <PatternMatch key="ERROR" pattern="%d{dd MMM yyyy HH:mm:ss} %c{10} %method %message %n"/>
+                    <PatternMatch key="INFO" pattern="%d{dd MMM yyyy HH:mm:ss} %message %n"/>
+                </ScriptPatternSelector>
+            </PatternLayout>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="RollingfileAppender"/>
+        </Root>
+    </Loggers>
+</Configuration>

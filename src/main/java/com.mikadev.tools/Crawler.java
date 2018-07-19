@@ -24,12 +24,16 @@ import com.mikadev.tools.html.Client;
 import com.mikadev.tools.html.Response;
 import com.mikadev.tools.xml.Activity;
 import com.mikadev.tools.xml.ConfigParser;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Crawler {
+    public static  final Logger logger = LogManager.getLogger(Crawler.class);
 
     public static void main(String[] args) {
         /*Client client = new Client();
@@ -47,7 +51,7 @@ public class Crawler {
         }
     }
 
-    private static void init() throws Exception {
+    private static void init() throws Exception {logger.log(Level.ERROR,"UUUHBLYA ");
         File configFile = new File("config.xml");
         if(!configFile.exists()) {
             throw new Exception("config.xml not found in the root directory.");
