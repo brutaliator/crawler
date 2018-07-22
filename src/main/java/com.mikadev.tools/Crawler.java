@@ -62,9 +62,18 @@ public class Crawler {
             Create.newDbCreate();
         }
 
-        //
-        //ConfigParser configParser = new ConfigParser();
-        //Config config = configParser.parse();
+        ConfigParser configParser = new ConfigParser();
+        Config config = configParser.parse();
+        Logic logic = new Logic(config);
+        logic.run();
+
+
+
+
+
+        //Client client = new Client();
+        //Response response = client.plainGetRequest("https://www.yandex.ru/mikko");
+
 
 }
 }

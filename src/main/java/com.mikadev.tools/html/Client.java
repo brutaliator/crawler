@@ -114,6 +114,7 @@ public class Client {
                 EntityUtils.consume(html);
             } catch (Exception e) {
                 logger.log(Level.ERROR, e);
+                throw new Exception(e);
             }finally {
                 response.close();
             }
