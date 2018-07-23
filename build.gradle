@@ -18,5 +18,7 @@ dependencies {
     compile group: 'com.h2database', name: 'h2', version: '1.4.193'
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+    // jsoup HTML parser library @ https://jsoup.org/
+    compile 'org.jsoup:jsoup:1.11.3'
 
 }
