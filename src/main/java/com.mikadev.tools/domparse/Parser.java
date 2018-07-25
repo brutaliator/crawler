@@ -95,9 +95,17 @@ public class Parser {
     }
 
     public static String getBoxLinkOrder(Element box) {
+        String link = null;
         Element descriptTender = getDescriptTender(box);
         Elements lines = descriptTender.getElementsByTag("dl");
-        return "http://zakupki.gov.ru"+lines.get(0).getElementsByTag("dt").get(0).getElementsByTag("a").attr("href");
+
+        if(!lines.get(0).getElementsByTag("dt").get(0).getElementsByTag("a").attr("href").contains("http://zakupki.gov.ru")) {
+            link = "http://zakupki.gov.ru"+lines.get(0).getElementsByTag("dt").get(0).getElementsByTag("a").attr("href");
+        } else {
+            link = lines.get(0).getElementsByTag("dt").get(0).getElementsByTag("a").attr("href");
+        }
+
+        return link;
     }
 
     public static String getBoxNameOrder(Element box) {
@@ -119,9 +127,29 @@ public class Parser {
         return instantBox;
     }
 
+
     public static String getBoxTradePlace(String link) {
+        String response = null;
+
         Element instantBox = goGetInstantBox(link);
-        Elements trs = instantBox.getElementsByTag("tr");
-        return trs.get(2).getElementsByTag("td").get(1).getElementsByTag("a").attr("href");
+        Elements nameHolderTr = instantBox.select("td:matches((.*)Адрес электронной площадки(.*))");
+        if(!nameHolderTr.isEmpty()) {
+            response = nameHolderTr.get(0).nextElementSibling().getElementsByTag("a").attr("href");
+        } else {
+            response = "В бумажном виде.";
+        }
+        return response;
+    }
+
+    public static String getBoxStopDate(String link) {
+        String response = null;
+        Element instantBox = goGetInstantBox(link);
+        Elements nameHolderTr = instantBox.select("td:matches((.*)окончания подачи(.*))");
+        if(!nameHolderTr.isEmpty()) {
+            response = nameHolderTr.get(0).nextElementSibling().text();
+        } else {
+            response = "Bad stop date";
+        }
+        return response;
     }
 }
