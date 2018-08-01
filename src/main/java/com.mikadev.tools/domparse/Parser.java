@@ -33,7 +33,7 @@ import java.lang.annotation.Documented;
 public class Parser {
     public static  final Logger logger = LogManager.getLogger(Parser.class);
 
-    private static int getLastPage(String dom) {
+    public static int getLastPage(String dom) {
 
         int response = 0;
         Document doc = Jsoup.parse(dom);
@@ -88,10 +88,11 @@ public class Parser {
     }
 
     public static String getBoxIdOrder(Element box) {
+        String id = null;
         Element descriptTender = getDescriptTender(box);
         Elements lines = descriptTender.getElementsByTag("dl");
-        //Remove № symbol
-        return lines.get(0).getElementsByTag("dt").get(0).getElementsByTag("a").text();
+        id = lines.get(0).getElementsByTag("dt").get(0).getElementsByTag("a").text().replace(" ","").replace("№","");
+        return id;
     }
 
     public static String getBoxLinkOrder(Element box) {

@@ -96,6 +96,10 @@ public class Client {
 
                         }
                         break;
+                    case "LONG_WHAIT":
+                        logger.log(Level.INFO,"Server anti-flood police. Will whait 30 minute. Server code: "+rawStatus);
+                        Thread.sleep(1800000);
+                        break;
                     case "DROP" :
                         logger.log(Level.ERROR,"Unknown problem. Terminate. Server code: "+rawStatus);
                         java.lang.System.exit(0);
@@ -166,7 +170,7 @@ public class Client {
                 break;
                 case  "3": response = "DROP";
                 break;
-                case  "4": response = "WHAIT";
+                case  "4": response = "LONG_WHAIT";
                 break;
                 case "5": response = "WHAIT";
                 break;

@@ -47,7 +47,7 @@ public class Create {
             String purchaseTableCreateQuery = "CREATE TABLE `purchases`( `id` INT(11) NOT NULL AUTO_INCREMENT, " +
                     "`activity` VARCHAR(50) NOT NULL, " +
                     "`purchaseId` BIGINT NOT NULL, " +
-                    "`date` TIMESTAMP WITH TIMEZONE NOT NULL, " +
+                    "`date` VARCHAR(50), " +
                     "PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=UTF8";
 
             statement.executeUpdate(purchaseTableCreateQuery);

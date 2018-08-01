@@ -20,6 +20,7 @@
 package com.mikadev.tools;
 
 public class Order {
+    private String activity;
     private String orderId;
     private String orderName;
     private String orderLink;
@@ -94,5 +95,13 @@ public class Order {
 
     public void setOrderTradePlace(String orderTradePlace) {
         this.orderTradePlace = orderTradePlace;
+    }
+
+    public String getActivity() {
+        return activity;
+    }
+
+    public void setActivity(String activity) {
+        this.activity = activity;
     }
 }

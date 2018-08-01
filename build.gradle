@@ -11,6 +11,22 @@ repositories {
     mavenCentral()
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.mikadev.tools.Crawler'
+        )
+    }
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
@@ -19,6 +35,12 @@ dependencies {
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
     // jsoup HTML parser library @ https://jsoup.org/
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
     compile 'org.jsoup:jsoup:1.11.3'
+    // https://mvnrepository.com/artifact/org.simplejavamail/simple-java-mail
+    compile group: 'org.simplejavamail', name: 'simple-java-mail', version: '5.0.3'
+
 
 }

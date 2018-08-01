@@ -19,13 +19,18 @@
  */
 package com.mikadev.tools;
 
+import com.mikadev.tools.database.DbOperations;
+import com.mikadev.tools.domparse.Parser;
 import com.mikadev.tools.html.Client;
 import com.mikadev.tools.xml.Activity;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.jsoup.nodes.Element;
+import javax.lang.model.util.Elements;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Logic {
     public static  final Logger logger = LogManager.getLogger(Logic.class);
@@ -37,28 +42,117 @@ public class Logic {
         this.client = new Client();
     }
 
-    public void run() {
+    public void run() throws Exception {
+
         for(int i =0; i<config.getActivities().size(); i++) {
             Activity activity = config.getActivities().get(i);
+            List<String > keyWords = activity.getKeywords();
+            List<Order> orders = new ArrayList<>();
 
             //For cities
 
             if(!activity.getWholeRegion()) {
+
+                //For all cities
                 for(int m = 0; m<activity.getCities().size(); m++) {
                     String city = activity.getCities().get(m);
-                    String noCityLink = firstRunLinkGenerate(activity);
+                    String noCityLink = firstRunLinkGenerate(true);
                     String cLink = cityURL(noCityLink,city);
-
+                    String cLinkFirstPage = cLink.replace("[PN]","1");
                     //Get pages count
+                    int cPages = Parser.getLastPage(client.plainGetRequest(cLinkFirstPage).getDom());
+                    if (cPages <1) continue;
+
+                    for(int h = 1; h<=cPages; h++) {
+                        String thisPage = cLink.replace("[PN]",String.valueOf(h));
+                        org.jsoup.select.Elements tenders = Parser.getBoxes(client.plainGetRequest(thisPage).getDom());
+                            if(tenders.isEmpty()) continue;
+                        for (Element tender: tenders) {
+                            String id= Parser.getBoxIdOrder(tender);
+                            String nameOrder = Parser.getBoxNameOrder(tender);
+                            if(!checkWordsContains(keyWords,nameOrder)) continue;
+                            if(isTenderInBase(id)) continue;
+                            Order order = new Order();
+                            order.setActivity(activity.getType());
+                            order.setOrderId(id);
+                            order.setOrderName(nameOrder);
+                            order.setOrderLink(Parser.getBoxLinkOrder(tender));
+                            order.setOrderType(Parser.getBoxTypeOrder(tender));
+                            order.setOrderLaw(Parser.getBoxLawOrder(tender));
+                            order.setOrderPrice(Parser.getBoxPriceOrder(tender));
+                            order.setOrderStopDate(Parser.getBoxStopDate(Parser.getBoxLinkOrder(tender)));
+                            order.setOrderTradePlace(Parser.getBoxLinkOrder(tender));
+
+                            orders.add(order);
+
+                        }
+                    }
+                }
+
+                //For whole region
+
+                String rLink = firstRunLinkGenerate(false);
+                String rLinkFirstPage = rLink.replace("[PN]","1");
+                int rPages = Parser.getLastPage(client.plainGetRequest(rLinkFirstPage).getDom());
+                if (rPages <1) continue;
+
+                for(int h = 1; h<=rPages; h++) {
+                    String thisPage = rLink.replace("[PN]",String.valueOf(h));
+                    org.jsoup.select.Elements tenders = Parser.getBoxes(client.plainGetRequest(thisPage).getDom());
+                    if(tenders.isEmpty()) continue;
+                    for (Element tender: tenders) {
+                        String id= Parser.getBoxIdOrder(tender);
+                        String nameOrder = Parser.getBoxNameOrder(tender);
+                        if(!checkWordsContains(keyWords,nameOrder)) continue;
+                        if(isTenderInBase(id)) continue;
+                        Order order = new Order();
+                        order.setActivity(activity.getType());
+                        order.setOrderId(id);
+                        order.setOrderName(nameOrder);
+                        order.setOrderLink(Parser.getBoxLinkOrder(tender));
+                        order.setOrderType(Parser.getBoxTypeOrder(tender));
+                        order.setOrderLaw(Parser.getBoxLawOrder(tender));
+                        order.setOrderPrice(Parser.getBoxPriceOrder(tender));
+                        order.setOrderStopDate(Parser.getBoxStopDate(Parser.getBoxLinkOrder(tender)));
+                        order.setOrderTradePlace(Parser.getBoxLinkOrder(tender));
+
+                        orders.add(order);
+
+                    }
                 }
             }
+
+
+
         }
     }
 
-    private String firstRunLinkGenerate(Activity activity) {
+    public Boolean checkWordsContains(List<String> keyWords, String orderName) {
+        Boolean contains = false;
+        for (String keyword: keyWords) {
+            if(org.apache.commons.lang3.StringUtils.containsIgnoreCase(orderName , keyword)) {
+                contains = true;
+                break;
+            }
+        }
+
+        return contains;
+    }
+
+    private boolean isTenderInBase(String id) {
+        Boolean inBase = null;
+        try {
+            inBase = DbOperations.checkTender(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return inBase;
+    }
+
+    private String firstRunLinkGenerate(Boolean isCities) {
         String link = null;
 
-        if(activity.getWholeRegion()) {
+        if(!isCities) {
             link = "http://zakupki.gov.ru/epz/order/extendedsearch/results.html?" +
                     "morphology=on&" +
                     "openMode=USE_DEFAULT_PARAMS&" +
@@ -86,7 +180,7 @@ public class Logic {
                     "fz44=on&" +
                     "fz223=on&" +
                     "ppRf615=on&" +
-                    "af=on&" +
+                    "fz94=on&af=on&" +
                     "currencyIdGeneral=-1&" +
                     "regionDeleted=false&" +
                     "deliveryAddress=[CITY]&" +
