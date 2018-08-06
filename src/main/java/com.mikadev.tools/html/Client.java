@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +126,27 @@ public class Client {
         }
 
         return  data;
+    }
+
+    public Response simplyRequest (String url) throws Exception {
+        Response data = new Response();
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.setHeader("charset","UTF-8");
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse response = httpClient.execute(httpGet);
+        try {
+
+            HttpEntity entity = response.getEntity();
+            String json = EntityUtils.toString(entity,StandardCharsets.UTF_8);
+            data.setStatus(response.getStatusLine().toString());
+            data.setDom(json);
+        }catch (Exception e) {
+            logger.log(Level.ERROR, e);
+            throw new Exception(e);
+        }finally {
+            response.close();
+        }
+        return data;
     }
 
     public Response singleProxyPlainGetRequest(String url) throws Exception {

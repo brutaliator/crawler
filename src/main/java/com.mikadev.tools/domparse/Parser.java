@@ -19,6 +19,9 @@
  */
 package com.mikadev.tools.domparse;
 
+import com.mikadev.tools.Defined;
+import com.mikadev.tools.MailTemplate;
+import com.mikadev.tools.Order;
 import com.mikadev.tools.html.Client;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +32,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.lang.annotation.Documented;
+import java.util.List;
 
 public class Parser {
     public static  final Logger logger = LogManager.getLogger(Parser.class);
@@ -84,7 +88,14 @@ public class Parser {
     public static String getBoxPriceOrder(Element box) {
         Element tenderTd = getTenderTd(box);
         Elements lines = tenderTd.getElementsByTag("dl");
-        return lines.get(0).getElementsByTag("dd").get(1).getElementsByTag("strong").text()+" руб.";
+        String prise = lines.get(0).getElementsByTag("dd").get(1).getElementsByTag("strong").text();
+
+        if(!prise.isEmpty()) {
+            prise = prise+" руб.";
+        } else {
+            prise = "Нет цены.";
+        }
+        return prise;
     }
 
     public static String getBoxIdOrder(Element box) {
@@ -145,12 +156,41 @@ public class Parser {
     public static String getBoxStopDate(String link) {
         String response = null;
         Element instantBox = goGetInstantBox(link);
-        Elements nameHolderTr = instantBox.select("td:matches((.*)окончания подачи(.*))");
-        if(!nameHolderTr.isEmpty()) {
+        Elements nameHolderTr = instantBox.select("td:matches((.*)окончания подачи|окончания срока подачи(.*))");
+        if(!nameHolderTr.get(0).nextElementSibling().text().isEmpty()) {
             response = nameHolderTr.get(0).nextElementSibling().text();
         } else {
             response = "Bad stop date";
         }
+        return response;
+    }
+
+    //Prepare HTML mail methods
+
+    public static String HTMLsetDate(String dom) {
+        return dom.replace("Date",Defined.getSimpleMoment());
+    }
+
+    public static String HTMLsetActivity(String dom, String activity) {
+        return dom.replace("Activity",activity);
+    }
+
+    public static String HTMLsetOrderds (List<Order> orders) {
+        String response = "";
+
+        for (Order order:orders) {
+            String orderRow = MailTemplate.ORDER_ROW;
+            orderRow = orderRow.replace("Summ",order.getOrderPrice());
+            orderRow = orderRow.replace("Stop date",order.getOrderStopDate());
+            orderRow = orderRow.replace("Link text","<a href=\""+order.getOrderLink()+"\">"+order.getOrderName()+"</a>");
+            if(!order.getOrderTradePlace().equals("В бумажном виде.")) {
+                orderRow = orderRow.replace("Trade palce","<a href=\""+order.getOrderTradePlace()+"\">Торговая площадка</a>");
+            } else {
+                orderRow = orderRow.replace("Trade palce",order.getOrderTradePlace());
+            }
+            response = response+orderRow;
+        }
+
         return response;
     }
 }

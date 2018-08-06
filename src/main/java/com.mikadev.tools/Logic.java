@@ -27,10 +27,16 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jsoup.nodes.Element;
+import org.simplejavamail.email.Email;
+import org.simplejavamail.email.EmailBuilder;
+import org.simplejavamail.mailer.MailerBuilder;
+
 import javax.lang.model.util.Elements;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Logic {
     public static  final Logger logger = LogManager.getLogger(Logic.class);
@@ -48,6 +54,7 @@ public class Logic {
             Activity activity = config.getActivities().get(i);
             List<String > keyWords = activity.getKeywords();
             List<Order> orders = new ArrayList<>();
+            ArrayList<String> inFirstLoop = new ArrayList<>();
 
             //For cities
 
@@ -81,9 +88,10 @@ public class Logic {
                             order.setOrderLaw(Parser.getBoxLawOrder(tender));
                             order.setOrderPrice(Parser.getBoxPriceOrder(tender));
                             order.setOrderStopDate(Parser.getBoxStopDate(Parser.getBoxLinkOrder(tender)));
-                            order.setOrderTradePlace(Parser.getBoxLinkOrder(tender));
+                            order.setOrderTradePlace(Parser.getBoxTradePlace(Parser.getBoxLinkOrder(tender)));
 
                             orders.add(order);
+                            inFirstLoop.add(order.getOrderId());
 
                         }
                     }
@@ -102,6 +110,7 @@ public class Logic {
                     if(tenders.isEmpty()) continue;
                     for (Element tender: tenders) {
                         String id= Parser.getBoxIdOrder(tender);
+                        if(inFirstLoop.contains(id)) continue;
                         String nameOrder = Parser.getBoxNameOrder(tender);
                         if(!checkWordsContains(keyWords,nameOrder)) continue;
                         if(isTenderInBase(id)) continue;
@@ -114,7 +123,7 @@ public class Logic {
                         order.setOrderLaw(Parser.getBoxLawOrder(tender));
                         order.setOrderPrice(Parser.getBoxPriceOrder(tender));
                         order.setOrderStopDate(Parser.getBoxStopDate(Parser.getBoxLinkOrder(tender)));
-                        order.setOrderTradePlace(Parser.getBoxLinkOrder(tender));
+                        order.setOrderTradePlace(Parser.getBoxTradePlace(Parser.getBoxLinkOrder(tender)));
 
                         orders.add(order);
 
@@ -122,10 +131,48 @@ public class Logic {
                 }
             }
 
-
-
+            if(activity.getEmails().size()<1) continue;
+            //Prepare mail
+            sandMail(activity,orders);
         }
+
+
     }
+
+    public Boolean sandMail(Activity activity, List<Order> orders) {
+        Boolean success = false;
+        String htmlBody = "";
+
+        String htmlDate = Parser.HTMLsetDate(MailTemplate.DATE_ROW);
+        String htmlActivity = Parser.HTMLsetActivity(MailTemplate.ACTIVITY_ROW,activity.getType());
+        String htmlOrders = Parser.HTMLsetOrderds(orders);
+        htmlBody = htmlBody+MailTemplate.HEADER+htmlDate+htmlActivity+htmlOrders+MailTemplate.FOOTER;
+
+        //Change date
+
+        String destinations = "";
+
+        for (String dest: activity.getEmails()) {
+            destinations = destinations+dest+",";
+        }
+
+        Email email = EmailBuilder.startingBlank()
+                .from("Crawler", "mika@mikadev.com")
+                .bcc(destinations)
+                .withSubject("Crawler report for "+activity.getType()+" activity.")
+                .withHTMLText(htmlBody)
+                .buildEmail();
+        MailerBuilder
+                .withSMTPServer("localhost", 25)
+                .buildMailer()
+                .sendMail(email);
+
+
+
+
+        return success;
+    }
+
 
     public Boolean checkWordsContains(List<String> keyWords, String orderName) {
         Boolean contains = false;

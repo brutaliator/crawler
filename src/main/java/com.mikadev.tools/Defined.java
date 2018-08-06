@@ -19,6 +19,17 @@
  */
 package com.mikadev.tools;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Defined {
     public static final String  DB_URL = "jdbc:h2:file:./db;AUTO_SERVER=TRUE;MV_STORE=FALSE;MVCC=FALSE";
+
+    public static String getSimpleMoment() {
+        String out = "";
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("dd-M-yyyy hh:mm:ss");
+        out = format.format(date);
+        return out;
+    }
 }
