@@ -19,9 +19,12 @@
  */
 package com.mikadev.tools;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.mikadev.tools.database.DbOperations;
 import com.mikadev.tools.domparse.Parser;
 import com.mikadev.tools.html.Client;
+import com.mikadev.tools.tbot.Bot;
 import com.mikadev.tools.xml.Activity;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -131,9 +134,28 @@ public class Logic {
                 }
             }
 
+            if(orders.isEmpty()) {
+                logger.log(Level.INFO,"Stop crawl. Orders list is empty.");
+                continue;
+            }
+            logger.log(Level.INFO,"We have "+orders.size()+" new orders today. Start mailing.");
             if(activity.getEmails().size()<1) continue;
-            //Prepare mail
+
+            //Prepare and send mail
             sandMail(activity,orders);
+
+            for (Order sendedOrder: orders) {
+                DbOperations.addTender(activity.getType(),sendedOrder.getOrderId());
+            }
+            logger.log(Level.INFO,"Added new records in to DB.");
+            if(activity.getTelegramBot()) {
+                logger.log(Level.INFO,"Start bot.");
+
+                //Prepare and send bot message.
+                sendBotMessage(activity,orders);
+            }
+
+            logger.log(Level.INFO,"Stop crawl. Successful.");
         }
 
 
@@ -171,6 +193,45 @@ public class Logic {
 
 
         return success;
+    }
+
+    public void sendBotMessage(Activity activity, List<Order> orders)  {
+        String message = "";
+
+        message = message+"*Crawler report for "+activity.getType()+" activity*\n";
+        message = message+"\n\n";
+
+        for (Order order:orders) {
+            message = message+"______________________\n";
+            message = message+order.getOrderName()+"\n";
+            message = message+order.getOrderPrice()+"\n";
+            message = message+order.getOrderStopDate()+"\n";
+            message = message+order.getOrderLink()+"\n";
+            message = message+"\n";
+        }
+
+        Boolean isSingleMessage = true;
+        String[] messagePart = new String[]{};
+
+        if(message.length()>=4096) {
+            isSingleMessage = false;
+            //double pt = (double) message.length()/4000;
+            //int parts = (int)Math.ceil(pt);
+            Iterable<String> result = Splitter.fixedLength(4000).split(message);
+            messagePart = Iterables.toArray(result, String.class);
+        }
+
+        Bot bot = new Bot();
+
+        if(isSingleMessage) {
+            System.out.println("SENDING");
+            bot.sentData(message);
+        } else {System.out.println("SENDING_MULTI");
+            for (String oneMessage:messagePart) {
+                bot.sentData(oneMessage);
+            }
+        }
+
     }
 
 

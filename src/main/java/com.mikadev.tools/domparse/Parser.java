@@ -81,8 +81,15 @@ public class Parser {
 
     public static String getBoxLawOrder(Element box) {
         Element tenderTd = getTenderTd(box);
-        Elements lines = tenderTd.getElementsByTag("dl");
-        return lines.get(0).getElementsByTag("dt").get(1).getElementsByTag("span").get(1).text();
+        //Elements lines = tenderTd.getElementsByTag("dl");
+        //return lines.get(0).getElementsByTag("dt").get(1).getElementsByTag("span").get(1).text();
+        Element spanFZ = tenderTd.select("span:matches((.*)Подача заявок(.*))").first();
+        String fz = spanFZ.getElementsByClass("orange").first().text();
+
+        if(fz.isEmpty()) {
+            fz = "Get data problem!";
+        }
+        return fz;
     }
 
     public static String getBoxPriceOrder(Element box) {

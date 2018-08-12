@@ -20,6 +20,9 @@
 package com.mikadev.tools.database;
 
 import com.mikadev.tools.Defined;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.h2.message.DbException;
 
 import java.math.BigInteger;
@@ -27,7 +30,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 
 public class DbOperations {
-
+    public static  final Logger logger = LogManager.getLogger(DbOperations.class);
     public static void addTender(String activity, String tenderId) throws Exception {
         Connection con = null;
         Statement  statement = null;
@@ -43,8 +46,11 @@ public class DbOperations {
             throw new Exception(e.toString());
         } finally {
             try {
-                con.close();
+                if(statement != null) {
+                    statement.close();
+                }
             } catch (SQLException e) {
+                logger.log(Level.ERROR,e);
                 throw new Exception(e.toString());
             }
 
@@ -70,13 +76,41 @@ public class DbOperations {
             throw new Exception(e.toString());
         } finally {
             try {
-                con.close();
+                if(preparedStatement != null) {
+                    preparedStatement.close();
+                }
             } catch (SQLException e) {
+                logger.log(Level.ERROR,e);
                 throw new Exception(e.toString());
             }
 
             if (con!=null) try {con.close();}catch (Exception ignore) {}
         }
         return isExist;
+    }
+
+    public static void removeAllTenders() throws Exception {
+        Connection con = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            con = DriverManager.getConnection(Defined.DB_URL);
+            preparedStatement = con.prepareStatement("DELETE FROM purchases");
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new Exception(e.toString());
+        } finally {
+            try {
+                if(preparedStatement !=null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ERROR,e);
+                throw new Exception(e.toString());
+            }
+
+            if (con!=null) try {con.close();}catch (Exception ignore) {}
+        }
     }
 }

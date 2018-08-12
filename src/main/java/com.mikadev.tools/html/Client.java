@@ -19,6 +19,7 @@
  */
 package com.mikadev.tools.html;
 
+import com.mikadev.tools.tbot.Bot;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -41,7 +42,7 @@ import java.util.regex.Pattern;
 
 public class Client {
     public static  final Logger logger = LogManager.getLogger(Client.class);
-
+    private Bot bot;
     private List<String> proxies;
 
     public Client() {
@@ -49,7 +50,7 @@ public class Client {
     }
 
     private void init() {
-
+        this.bot = new Bot();
     }
 
     public void setProxies(List<String> list) {
@@ -92,21 +93,30 @@ public class Client {
 
                         if(tryNum == 4) {
                             logger.log(Level.INFO,"Server problem at 4 time. Will terminate. Server code: "+rawStatus);
+                            bot.sentData("Server problem at 4 time. Will terminate. Server code: "+rawStatus);
                             logger.log(Level.ERROR,"Server problem. Terminate. Server code: "+rawStatus);
                             java.lang.System.exit(0);
 
                         }
                         break;
                     case "LONG_WHAIT":
+                        if(tryNum >= 6) {
+                            logger.log(Level.INFO,"Server problem at 6 or more time. Will terminate. Server code: "+rawStatus);
+                            bot.sentData("Server problem at 6 or more time. Will terminate. Server code: "+rawStatus);
+                            logger.log(Level.ERROR,"Server problem. Terminate. Server code: "+rawStatus);
+                            java.lang.System.exit(0);
+                        }
                         logger.log(Level.INFO,"Server anti-flood police. Will whait 30 minute. Server code: "+rawStatus);
                         Thread.sleep(1800000);
                         break;
                     case "DROP" :
                         logger.log(Level.ERROR,"Unknown problem. Terminate. Server code: "+rawStatus);
+                        bot.sentData("Unknown problem. Terminate. Server code: "+rawStatus);
                         java.lang.System.exit(0);
                         break;
                     case "BAD_PARSE_CODE" :
                         logger.log(Level.ERROR,"Parse server code error. Terminate. Server code: "+rawStatus);
+                        bot.sentData("Parse server code error. Terminate. Server code: "+rawStatus);
                         java.lang.System.exit(0);
                         break;
 

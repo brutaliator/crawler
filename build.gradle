@@ -50,6 +50,9 @@ dependencies {
     compile 'org.jsoup:jsoup:1.11.3'
     // https://mvnrepository.com/artifact/org.simplejavamail/simple-java-mail
     compile group: 'org.simplejavamail', name: 'simple-java-mail', version: '5.0.3'
+    // https://mvnrepository.com/artifact/com.google.guava/guava
+    compile group: 'com.google.guava', name: 'guava', version: '11.0.2'
+
 
 
 }

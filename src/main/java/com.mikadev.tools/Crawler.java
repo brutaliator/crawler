@@ -20,6 +20,7 @@
 package com.mikadev.tools;
 
 import com.mikadev.tools.database.Create;
+import com.mikadev.tools.database.DbOperations;
 import com.mikadev.tools.domparse.Parser;
 import com.mikadev.tools.tbot.Bot;
 import com.mikadev.tools.xml.Activity;
@@ -33,6 +34,7 @@ import org.simplejavamail.mailer.MailerBuilder;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,14 +45,7 @@ public class Crawler {
     public static  final Logger logger = LogManager.getLogger(Crawler.class);
 
     public static void main(String[] args) {
-        /*Client client = new Client();
-        try {
-            Response response = client.plainGetRequest("https://www.google.ru");
-            System.out.println(response.getStatus());
-            System.out.println(response.getDom());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
+        logger.log(Level.INFO,"Start crawl.");
         try {
             init();
         } catch (Exception e) {
@@ -58,8 +53,8 @@ public class Crawler {
         }
     }
 
-    private static void init() throws Exception {logger.log(Level.ERROR,"UUUHBLYA ");
-        File configFile = new File("config.xml");
+    private static void init() throws Exception {
+        File configFile = new File(System.getProperty("user.dir")+File.separator+"config.xml");
         if(!configFile.exists()) {
             throw new Exception("config.xml not found in the root directory.");
         }
@@ -69,15 +64,11 @@ public class Crawler {
             Create.newDbCreate();
         }
 
-        //ConfigParser configParser = new ConfigParser();
-        //Config config = configParser.parse();
+        ConfigParser configParser = new ConfigParser();
+        Config config = configParser.parse();
 
-        //Logic logic = new Logic(config);
-        //logic.run();
-
-
-        Bot bot = new Bot();
-        bot.sentData("ВОДОЛЕЙ");
-
+        Logic logic = new Logic(config);
+        //DbOperations.removeAllTenders();
+        logic.run();
 }
 }

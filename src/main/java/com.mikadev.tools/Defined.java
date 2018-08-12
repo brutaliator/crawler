@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Defined {
-    public static final String  DB_URL = "jdbc:h2:file:./db;AUTO_SERVER=TRUE;MV_STORE=FALSE;MVCC=FALSE";
+    public static final String  DB_URL = "jdbc:h2:file:./db;AUTO_SERVER=TRUE;MV_STORE=FALSE;MVCC=TRUE";
 
     public static String getSimpleMoment() {
         String out = "";
