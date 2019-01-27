@@ -53,10 +53,16 @@ public class Logic {
 
     public void run() throws Exception {
 
+        //OTC market code here
+        //Create new class OTCLogic that will get @config and iterate through all activities.
+        //Then get all orders , mailing it, boting it and pass control to code below
+        //All network errors must just logging but no stop app run.
+
         for(int i =0; i<config.getActivities().size(); i++) {
             Activity activity = config.getActivities().get(i);
             List<String > keyWords = activity.getKeywords();
             List<Order> orders = new ArrayList<>();
+
             ArrayList<String> inFirstLoop = new ArrayList<>();
 
             //For cities
@@ -72,7 +78,6 @@ public class Logic {
                     //Get pages count
                     int cPages = Parser.getLastPage(client.plainGetRequest(cLinkFirstPage).getDom());
                     if (cPages <1) continue;
-
                     for(int h = 1; h<=cPages; h++) {
                         String thisPage = cLink.replace("[PN]",String.valueOf(h));
                         org.jsoup.select.Elements tenders = Parser.getBoxes(client.plainGetRequest(thisPage).getDom());
@@ -106,7 +111,6 @@ public class Logic {
                 String rLinkFirstPage = rLink.replace("[PN]","1");
                 int rPages = Parser.getLastPage(client.plainGetRequest(rLinkFirstPage).getDom());
                 if (rPages <1) continue;
-
                 for(int h = 1; h<=rPages; h++) {
                     String thisPage = rLink.replace("[PN]",String.valueOf(h));
                     org.jsoup.select.Elements tenders = Parser.getBoxes(client.plainGetRequest(thisPage).getDom());
@@ -135,14 +139,14 @@ public class Logic {
             }
 
             if(orders.isEmpty()) {
-                logger.log(Level.INFO,"Stop crawl. Orders list is empty.");
+                logger.log(Level.INFO,"Stop crawl. Orders list is empty for this activity. ");
                 continue;
             }
             logger.log(Level.INFO,"We have "+orders.size()+" new orders today. Start mailing.");
             if(activity.getEmails().size()<1) continue;
 
             //Prepare and send mail
-            sandMail(activity,orders);
+              sandMail(activity,orders);
 
             for (Order sendedOrder: orders) {
                 DbOperations.addTender(activity.getType(),sendedOrder.getOrderId());
@@ -152,7 +156,7 @@ public class Logic {
                 logger.log(Level.INFO,"Start bot.");
 
                 //Prepare and send bot message.
-                sendBotMessage(activity,orders);
+                  sendBotMessage(activity,orders);
             }
 
             logger.log(Level.INFO,"Stop crawl. Successful.");
@@ -224,9 +228,8 @@ public class Logic {
         Bot bot = new Bot();
 
         if(isSingleMessage) {
-            System.out.println("SENDING");
             bot.sentData(message);
-        } else {System.out.println("SENDING_MULTI");
+        } else {
             for (String oneMessage:messagePart) {
                 bot.sentData(oneMessage);
             }

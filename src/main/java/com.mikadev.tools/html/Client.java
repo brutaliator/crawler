@@ -20,19 +20,23 @@
 package com.mikadev.tools.html;
 
 import com.mikadev.tools.tbot.Bot;
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +124,11 @@ public class Client {
                         java.lang.System.exit(0);
                         break;
 
+                    case "SKIP" :
+                        logger.log(Level.ERROR,"Broken page server error. Will skip. Server code: "+rawStatus);
+                        //bot.sentData("Broken page server error. Will skip. Server code: "+rawStatus);
+                        keepTrying = false;
+                        break;
 
                 }
 
@@ -144,6 +153,40 @@ public class Client {
         httpGet.setHeader("charset","UTF-8");
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = httpClient.execute(httpGet);
+        try {
+
+            HttpEntity entity = response.getEntity();
+            String json = EntityUtils.toString(entity,StandardCharsets.UTF_8);
+            data.setStatus(response.getStatusLine().toString());
+            data.setDom(json);
+        }catch (Exception e) {
+            logger.log(Level.ERROR, e);
+            throw new Exception(e);
+        }finally {
+            response.close();
+        }
+        return data;
+    }
+
+    public Response getRequest(Boolean isPost ,Header[] headers , String urlText , URI uri) throws Exception {
+        Response data = new Response();
+        String url = (uri == null) ? urlText : uri.toString();
+        HttpGet httpGet = new HttpGet(url);
+        HttpPost httpPost = new HttpPost(url);
+        if(headers == null) {
+            Header charset = new BasicHeader("charset","UTF-8");
+            headers = new Header[1];
+            headers[0] = charset;
+        }
+
+        if(!isPost) {
+            httpGet.setHeaders(headers);
+        } else {
+            httpPost.setHeaders(headers);
+        }
+
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse response = (isPost) ? httpClient.execute(httpPost) : httpClient.execute(httpGet) ;
         try {
 
             HttpEntity entity = response.getEntity();
@@ -204,7 +247,12 @@ public class Client {
                 break;
                 case  "4": response = "LONG_WHAIT";
                 break;
-                case "5": response = "WHAIT";
+                case "5":
+                    if(m.group().substring(0,3).equals("500")) {
+                        response = "SKIP";
+                    } else {
+                        response = "WHAIT";
+                    }
                 break;
             }
 

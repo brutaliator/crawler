@@ -23,6 +23,7 @@ import com.mikadev.tools.Defined;
 import com.mikadev.tools.MailTemplate;
 import com.mikadev.tools.Order;
 import com.mikadev.tools.html.Client;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +31,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 
 import java.lang.annotation.Documented;
 import java.util.List;
@@ -138,9 +140,16 @@ public class Parser {
         Client client = new Client();
         try {
             String dom = client.plainGetRequest(link).getDom();
-            Document doc = Jsoup.parse(dom);
-            instantBox = doc.getElementsByClass("noticeTabBox").get(0);
+            if(!dom.isEmpty()) {
+                Document doc = Jsoup.parse(dom);
+
+                if(doc.getElementsByClass("noticeTabBox").size() > 0) {
+                    instantBox = doc.getElementsByClass("noticeTabBox").get(0);
+                }
+
+            }
         } catch (Exception e) {
+            e.printStackTrace();
             logger.log(Level.ERROR,e);
         }
         return instantBox;
@@ -151,6 +160,8 @@ public class Parser {
         String response = null;
 
         Element instantBox = goGetInstantBox(link);
+        if(instantBox == null) return "Bad page";
+
         Elements nameHolderTr = instantBox.select("td:matches((.*)Адрес электронной площадки(.*))");
         if(!nameHolderTr.isEmpty()) {
             response = nameHolderTr.get(0).nextElementSibling().getElementsByTag("a").attr("href");
@@ -163,12 +174,22 @@ public class Parser {
     public static String getBoxStopDate(String link) {
         String response = null;
         Element instantBox = goGetInstantBox(link);
+
+        if(instantBox == null) return "Bad page";
+
         Elements nameHolderTr = instantBox.select("td:matches((.*)окончания подачи|окончания срока подачи(.*))");
-        if(!nameHolderTr.get(0).nextElementSibling().text().isEmpty()) {
-            response = nameHolderTr.get(0).nextElementSibling().text();
+        if(nameHolderTr.get(0).nextElementSibling() != null) {
+            if(nameHolderTr.get(0).nextElementSibling().hasText()) {
+                response = nameHolderTr.get(0).nextElementSibling().text();
+            } else {
+                response = "Bad stop date";
+            }
         } else {
             response = "Bad stop date";
         }
+
+
+
         return response;
     }
 

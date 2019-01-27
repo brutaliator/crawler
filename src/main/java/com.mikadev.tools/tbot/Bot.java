@@ -27,7 +27,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 public class Bot {
-    public static final String KEY = "bot_key";
+    public static final String KEY = "bot680912472:AAHjwQqBijYQVqW0V3LluX8bBBni7uT9iyg";
     public static String mainLink = "https://api.telegram.org/"+KEY+"/";
     public Bot() {
 
@@ -35,7 +35,7 @@ public class Bot {
 
     public void sentData(String data) {
         Client client = new Client();
-        String link = mainLink+"sendMessage?&parse_mode=Markdown&chat_id=chat_id&text=";
+        String link = mainLink+"sendMessage?&parse_mode=Markdown&chat_id=-296215351&text=";
         try {
             data = URLEncoder.encode(data ,"UTF-8");
             link = link+data;
