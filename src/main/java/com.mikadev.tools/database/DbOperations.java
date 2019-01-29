@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 
 public class DbOperations {
     public static  final Logger logger = LogManager.getLogger(DbOperations.class);
+
     public static void addTender(String activity, String tenderId) throws Exception {
         Connection con = null;
         Statement  statement = null;
@@ -112,5 +113,96 @@ public class DbOperations {
 
             if (con!=null) try {con.close();}catch (Exception ignore) {}
         }
+    }
+
+    public static boolean checkOtcCookiesTable() throws Exception {
+        Boolean isExist = false;
+        Connection con = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            con = DriverManager.getConnection(Defined.DB_URL);
+            preparedStatement = con.prepareStatement("SHOW TABLES FROM PUBLIC");
+            Boolean rq = preparedStatement.execute();
+            if(rq) {
+                ResultSet rs = preparedStatement.getResultSet();
+                while (rs.next()) {
+                    if(rs.getString(rs.getRow()).equals("COOKIES")) {
+                        isExist = true;
+                        break;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new Exception(e.toString());
+        } finally {
+            try {
+                if(preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ERROR,e);
+                throw new Exception(e.toString());
+            }
+
+            if (con!=null) try {con.close();}catch (Exception ignore) {}
+        }
+        return isExist;
+    }
+
+    public static void addOtcCookie(String otcUser, String otcCookie) throws Exception {
+        Connection con = null;
+        Statement  statement = null;
+
+        try {
+            con = DriverManager.getConnection(Defined.DB_URL);
+            statement = con.createStatement();
+            String insert = "INSERT INTO COOKIES (`otcuser`, `cookie` ) VALUES ('"+otcUser+"','"+otcCookie+"',)";
+            statement.executeUpdate(insert);
+        } catch (SQLException e) {
+            throw new Exception(e.toString());
+        } finally {
+            try {
+                if(statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ERROR,e);
+                throw new Exception(e.toString());
+            }
+
+            if (con!=null) try {con.close();}catch (Exception ignore) {}
+        }
+
+    }
+
+    public static String getOtcCookieByUser(String otcUser) throws Exception {
+        String cookie = null;
+        Connection con = null;
+        PreparedStatement preparedStatement = null;
+
+        try {
+            con = DriverManager.getConnection(Defined.DB_URL);
+            preparedStatement = con.prepareStatement("SELECT cookie FROM COOKIES WHERE otcuser = ?");
+            preparedStatement.setString(1,otcUser);
+            ResultSet rs = preparedStatement.executeQuery();
+            if(rs.next()) {
+                cookie = rs.getString("cookie");
+            }
+        } catch (SQLException e) {
+            throw new Exception(e.toString());
+        } finally {
+            try {
+                if(preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                logger.log(Level.ERROR,e);
+                throw new Exception(e.toString());
+            }
+
+            if (con!=null) try {con.close();}catch (Exception ignore) {}
+        }
+        return cookie;
     }
 }

@@ -27,6 +27,8 @@ public class Activity {
         private List<String> cities;
         private List<String> keywords;
         private List<String> emails;
+        private String otcUser;
+        private String otcPassword;
         private Boolean telegramBot;
 
     public Activity() {
@@ -78,5 +80,21 @@ public class Activity {
 
     public void setTelegramBot(Boolean telegramBot) {
         this.telegramBot = telegramBot;
+    }
+
+    public String getOtcUser() {
+        return otcUser;
+    }
+
+    public void setOtcUser(String otcUser) {
+        this.otcUser = otcUser;
+    }
+
+    public String getOtcPassword() {
+        return otcPassword;
+    }
+
+    public void setOtcPassword(String otcPassword) {
+        this.otcPassword = otcPassword;
     }
 }

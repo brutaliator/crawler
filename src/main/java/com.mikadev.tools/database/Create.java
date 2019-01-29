@@ -58,4 +58,25 @@ public class Create {
             try { statement.close(); } catch(SQLException se) { se.printStackTrace();}
         }
     }
+
+    public static void createCookieTable(){
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = DriverManager.getConnection(Defined.DB_URL);
+            statement = connection.createStatement();
+
+            String purchaseTableCreateQuery = "CREATE TABLE `COOKIES`( `id` INT(11) NOT NULL AUTO_INCREMENT, " +
+                    "`otcuser` VARCHAR(50) NOT NULL, " +
+                    "`cookie` VARCHAR(60000), " +
+                    "PRIMARY KEY (`id`) ) ENGINE=InnoDB DEFAULT CHARSET=UTF8";
+
+            statement.executeUpdate(purchaseTableCreateQuery);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try { connection.close(); } catch(SQLException se) {se.printStackTrace();}
+            try { statement.close(); } catch(SQLException se) { se.printStackTrace();}
+        }
+    }
 }

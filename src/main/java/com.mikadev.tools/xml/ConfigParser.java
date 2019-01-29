@@ -110,13 +110,27 @@ public class ConfigParser {
 
                         activity.setEmails(emails);
                     }
+
+                    //Find OTC market params and set it
+                    if(insideActivityNode.getNodeType() != Node.TEXT_NODE && insideActivityNode.getNodeName().equals("OtcParams") ) {
+                        NodeList otcParamsNode = insideActivityNode.getChildNodes();
+                        for(int j = 0; j< otcParamsNode.getLength(); j++ ) {
+                            if(otcParamsNode.item(j).getNodeType() != Node.TEXT_NODE && otcParamsNode.item(j).getNodeName().equals("OtcUser")) {
+                                activity.setOtcUser(otcParamsNode.item(j).getFirstChild().getTextContent());
+                            }
+
+                            if(otcParamsNode.item(j).getNodeType() != Node.TEXT_NODE && otcParamsNode.item(j).getNodeName().equals("OtcPassword")) {
+                                activity.setOtcPassword(otcParamsNode.item(j).getFirstChild().getTextContent());
+                            }
+
+                        }
+                    }
                 }
 
                 //Find telegram node and set it
                 activity.setTelegramBot(node.getLastChild().getPreviousSibling().getTextContent().equals("1"));
 
                 //Put activity to activities list
-
                 activities.add(activity);
             }
         }
